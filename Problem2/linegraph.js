@@ -31,17 +31,36 @@
         });
 
 
-    d3.csv("timeline.csv", function(data) {
-
-        // convert your csv data and add it to dataSet
-
-        return createVis();
-    });
+   d3.csv("worldPop.csv", function(d) {
+            return {
+                year:+d.year,
+                usCensus: +d.USCensus,
+                popRefBur: +d.PopulationBureau,
+                un: +d.UN,
+                hyde: +d.HYDE,
+                maddison: +d.Maddison};
+				},
+			function(error,rows){
+				rowsClean = rows || ""
+				dataSet.push(rowsClean);
+				//console.log(dataSet);
+				return createVis();
+				
+			});
+			
+		
 
     createVis = function() {
-        var xAxis, xScale, yAxis,  yScale;
-
-          xScale = d3.scale.linear().domain([0,100]).range([0, bbVis.w]);  // define the right domain generically
+    	//console.log(dataSet);
+    	
+    	dataSet.forEach(function(data) {
+	    	console.log(data[0]);
+	    	data.forEach(function(d,i){
+		    	console.log(d.year);
+	    	})
+    	})
+         var xAxis, xScale, yAxis,  yScale;
+         xScale = d3.scale.linear().domain([0,100]).range([0, bbVis.w]);  // define the right domain generically
 
 		  // example that translates to the bottom left of our vis space:
 		  var visFrame = svg.append("g").attr({
