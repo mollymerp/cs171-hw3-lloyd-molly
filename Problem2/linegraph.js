@@ -1,7 +1,6 @@
-/**
- * Created by hen on 2/20/14.
- */
-    var bbVis, brush, createVis, dataSet, handle, height, margin, svg, svg2, width;
+   
+
+var bbVis, brush, createVis, dataSet, handle, height, margin, svg, svg2, width;
 
     margin = {
         top: 50,
@@ -21,7 +20,16 @@
         h: 100
     };
 
-    dataSet = [];
+var usCensusData = [{}];
+var popRefBur = [];
+var un = [];
+var hyde = [];
+var maddison = [];
+
+var dataSet = [];
+var color = d3.scale.category10();
+
+
 
     svg = d3.select("#vis").append("svg").attr({
         width: width + margin.left + margin.right,
@@ -32,6 +40,7 @@
 
 
    d3.csv("worldPop.csv", function(d) {
+       //color.domain(d3.keys(data[0]).filter(function(key) { return key !== "year"; }));
             return {
                 year:+d.year,
                 usCensus: +d.USCensus,
@@ -39,44 +48,55 @@
                 un: +d.UN,
                 hyde: +d.HYDE,
                 maddison: +d.Maddison};
-				},
-			function(error,rows){
-				rowsClean = rows || ""
-				dataSet.push(rowsClean);
-				//console.log(dataSet);
-				return createVis();
-				
-			});
-			
-		
+    },
+	  function(error,rows){
+	      console.log(rows[0]);
+	      rowsClean = rows || ""
+	      dataSet.push(rowsClean);
+	      console.log(usCensusData);
+	      return createVis();
 
-    createVis = function() {
-    	//console.log(dataSet);
-    	
-    	dataSet.forEach(function(data) {
-	    	console.log(data[0]);
-	    	data.forEach(function(d,i){
-		    	console.log(d.year);
-	    	})
-    	})
-         var xAxis, xScale, yAxis,  yScale;
-         xScale = d3.scale.linear().domain([0,100]).range([0, bbVis.w]);  // define the right domain generically
+});
 
-		  // example that translates to the bottom left of our vis space:
-		  var visFrame = svg.append("g").attr({
-		      "transform": "translate(" + bbVis.x + "," + (bbVis.y + bbVis.h) + ")",
-		  	  //....
-			  
-		  });
-		  
-		  visFrame.append("rect");
-		  //....
-		  
-//        yScale = .. // define the right y domain and range -- use bbVis
 
-//        xAxis = ..
-//        yAxis = ..
-//        // add y axis to svg !
+createVis = function() {
+
+   // console.log(dataSet[0]);
+
+    function isPos(element){
+	return element > 0; }   
+ 
+  
+
+    dataSet.forEach(function(data) {
+	 data.forEach(function(d,i){
+	    if (d.usCensus > 0) {
+	        usCensusData.push([{ "year":d.year,"population": d.usCensus} ]); };
+	     if (d.popRefBur > 0) {
+	         popRefBur.push([{ "year": d.year, "population": d.popRefBur}]);} 
+	     
+})
+     })
+    console.log(popRefBur);
+
+         var xAxis, xScale, yAxis, yScale;
+         xScale = d3.scale.linear().domain([0,100]).range([0, bbVis.w]); // define the right domain generically
+
+// example that translates to the bottom left of our vis space:
+var visFrame = svg.append("g").attr({
+"transform": "translate(" + bbVis.x + "," + (bbVis.y + bbVis.h) + ")",
+//....
+
+});
+
+visFrame.append("rect");
+//....
+
+// yScale = .. // define the right y domain and range -- use bbVis
+
+// xAxis = ..
+// yAxis = ..
+// // add y axis to svg !
 
 
     };
