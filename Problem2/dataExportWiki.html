@@ -24,7 +24,8 @@
 
             var content = root.find("#content"); // find all the nodes that have ID "content"
             var h2s = content.find(".mw-headline"); // search in all "content" nodes for nodes of class ".mw-headline"
-
+				console.log(h2s);
+				
             $.each(h2s, function(index, value) {
                 console.log($(value).text()); // print text
             });
