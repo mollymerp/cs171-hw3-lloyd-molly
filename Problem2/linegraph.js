@@ -20,27 +20,35 @@ var bbVis, brush, createVis, dataSet, handle, height, margin, svg, svg2, width;
         h: 100
     };
 
-var usCensusData = [{}];
-var popRefBur = [];
-var un = [];
-var hyde = [];
-var maddison = [];
+var xAxis, xScale, yAxis, yScale;
+         xScale = d3.scale.linear().range([0, bbVis.w]);
+         	 // define the right domain generically
+		 yScale = d3.scale.linear().range([bbVis.h,0]);
+		 
+		 xAxis =d3.svg.axis().scale(xScale).orient("bottom");
+		 yAxis = d3.svg.axis().scale(yScale).orient("left");
 
+//from mbostock: dat == data, dataSet = cities
+	
+
+
+var dat = [];
 var dataSet = [];
 var color = d3.scale.category10();
 
 
 
     svg = d3.select("#vis").append("svg").attr({
-        width: width + margin.left + margin.right,
-        height: height + margin.top + margin.bottom
-    }).append("g").attr({
+        	width: width + margin.left + margin.right,
+			height: height + margin.top + margin.bottom})
+        .append("g")
+        .attr({
             transform: "translate(" + margin.left + "," + margin.top + ")"
-        });
+			});
 
 
    d3.csv("worldPop.csv", function(d) {
-       //color.domain(d3.keys(data[0]).filter(function(key) { return key !== "year"; }));
+      
             return {
                 year:+d.year,
                 usCensus: +d.USCensus,
@@ -48,12 +56,26 @@ var color = d3.scale.category10();
                 un: +d.UN,
                 hyde: +d.HYDE,
                 maddison: +d.Maddison};
-    },
+           },
 	  function(error,rows){
-	      console.log(rows[0]);
-	      rowsClean = rows || ""
-	      dataSet.push(rowsClean);
-	      console.log(usCensusData);
+	      color.domain(d3.keys(rows[0]).filter(function(key) { return key !== 			"year"; }));
+	      rowsClean = rows || 0;
+	      dat.push(rowsClean);
+	      
+	    var cities = color.domain().map(function(name) {
+				 return {
+					 name: name,
+					 values: rowsClean.map(function(d) {
+						 return {year: d.year, population: +d[name]};
+							 })
+							 };
+							 });
+		cities.forEach( function(d,i) {
+			//console.log(d.values[0].population);
+			dataSet.push(d);
+		})					 
+		  //dataSet.push();
+			
 	      return createVis();
 
 });
@@ -61,35 +83,70 @@ var color = d3.scale.category10();
 
 createVis = function() {
 
-   // console.log(dataSet[0]);
 
-    function isPos(element){
-	return element > 0; }   
- 
-  
 
-    dataSet.forEach(function(data) {
-	 data.forEach(function(d,i){
-	    if (d.usCensus > 0) {
-	        usCensusData.push([{ "year":d.year,"population": d.usCensus} ]); };
-	     if (d.popRefBur > 0) {
-	         popRefBur.push([{ "year": d.year, "population": d.popRefBur}]);} 
-	     
-})
-     })
-    console.log(popRefBur);
+	dataSet.map (function(m){
+     	m.values = m.values.filter(function(a){return a.population >0})
+	 	});
 
-         var xAxis, xScale, yAxis, yScale;
-         xScale = d3.scale.linear().domain([0,100]).range([0, bbVis.w]); // define the right domain generically
+	 
+	var line = d3.svg.line()
+            .interpolate("basis")
+            .xScale(function(d) { return xScale(d.year); })
+            .yScale(function(d) { return yScale(d.population); });
 
+   
+	xScale.domain(d3.extent(dat, function(d){return d.year;}));
+
+	yScale.domain([
+		d3.min(dataSet, function(c) {return d3.min(c.values,function(v){
+			return v.population; }); }),
+		d3.max(dataSet, function(c) {return d3.max(c.values,function(v){
+			return v.population; }); })
+			]);
+	
+	svg.append("g")
+                .attr("class", "x-axis")
+                .attr("transform", "translate(0," + height + ")")
+                .call(xAxis);
+
+	svg.append("g")
+                .attr("class", "y-axis")
+                .call(yAxis)
+                .append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 6)
+                .attr("dy", ".71em")
+                .style("text-anchor", "end")
+                .text("Population");
+                
+	var popEst = svg.selectAll(".popEst")
+                .data(dataSet)
+                .enter().append("g")
+                .attr("class", "popEst");
+      
+     popEst.append("path")
+                .attr("class", "line")
+                .attr("d", function(d) { return line(d.values); })
+                .style("stroke", function(d) { return color(d.name); });          
+     
+     
+     
+      popEst.append("text")
+                .datum(function(d) { return {name: d.name, value: d.values[d.values.length - 1]}; })
+                .attr("transform", function(d) { return "translate(" + x(d.value.year) + "," + y(d.value.population) + ")"; })
+                .attr("x", 3)
+                .attr("dy", ".35em")
+                .text(function(d) { return d.name; });
+                
+                
 // example that translates to the bottom left of our vis space:
-var visFrame = svg.append("g").attr({
-"transform": "translate(" + bbVis.x + "," + (bbVis.y + bbVis.h) + ")",
+	var visFrame = svg.append("g").attr({ "transform": "translate(" + bbVis.x + "," + (bbVis.y + bbVis.h) + ")",
 //....
 
 });
 
-visFrame.append("rect");
+	visFrame.append("rect");
 //....
 
 // yScale = .. // define the right y domain and range -- use bbVis

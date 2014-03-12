@@ -4,26 +4,33 @@
     <title></title>
     <script src="../libs/d3.v3.min.js"></script>
     <style>
-        .axis path,
-        .axis line {
-            fill: none;
-            stroke: lightgrey; }
 
-        .dataArea {
-            stroke: 1px steelblue;
-            fill:steelblue;
-            fill-opacity:0.5;
-            clip-path: url(#clip);
-        }
+    body {
+        font: 10px sans-serif;
+    }
 
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: #000;
+        shape-rendering: crispEdges;
+    }
+
+    .x.axis path {
+        display: none;
+    }
+
+    .line {
+        fill: none;
+        stroke: steelblue;
+        stroke-width: 1.5px;
+    }
 
     </style>
 
 </head>
 <body>
     <div id="vis"></div>
-
-
 	<script src = "linegraph.js"></script>
 
 
