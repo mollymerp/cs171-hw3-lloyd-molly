@@ -20,13 +20,13 @@ var bbVis, brush, createVis, dataSet, handle, height, margin, svg, svg2, width;
         h: 100
     };
 
-var xAxis, xScale, yAxis, yScale;
-         xScale = d3.scale.linear().range([0, bbVis.w]);
+var xAxis, x, yAxis, y;
+         x = d3.scale.linear().range([0, bbVis.w]);
          	 // define the right domain generically
-		 yScale = d3.scale.linear().range([bbVis.h,0]);
+		 y = d3.scale.linear().range([bbVis.h,0]);
 		 
-		 xAxis =d3.svg.axis().scale(xScale).orient("bottom");
-		 yAxis = d3.svg.axis().scale(yScale).orient("left");
+		 xAxis =d3.svg.axis().scale(x).orient("bottom");
+		 yAxis = d3.svg.axis().scale(y).orient("left");
 
 //from mbostock: dat == data, dataSet = cities
 	
@@ -58,7 +58,7 @@ var color = d3.scale.category10();
                 maddison: +d.Maddison};
            },
 	  function(error,rows){
-	      color.domain(d3.keys(rows[0]).filter(function(key) { return key !== 			"year"; }));
+	      color.domain(d3.keys(rows[0]).filter(function(key) { return key !== "year"; }));
 	      rowsClean = rows || 0;
 	      dat.push(rowsClean);
 	      
@@ -71,34 +71,27 @@ var color = d3.scale.category10();
 							 };
 							 });
 		cities.forEach( function(d,i) {
-			//console.log(d.values[0].population);
 			dataSet.push(d);
-		})					 
-		  //dataSet.push();
-			
-	      return createVis();
+		})					 		
+	    return createVis();
 
 });
 
 
-createVis = function() {
-
-
-
-	dataSet.map (function(m){
+createVis = function(){
+	dataSet.map(function(m){
      	m.values = m.values.filter(function(a){return a.population >0})
 	 	});
-
 	 
 	var line = d3.svg.line()
             .interpolate("basis")
-            .xScale(function(d) { return xScale(d.year); })
-            .yScale(function(d) { return yScale(d.population); });
+            .x(function(d) { return x(d.year); })
+            .y(function(d) { return y(d.population); });
 
    
-	xScale.domain(d3.extent(dat, function(d){return d.year;}));
+	x.domain(d3.extent(dat, function(d){return d.year;}));
 
-	yScale.domain([
+	y.domain([
 		d3.min(dataSet, function(c) {return d3.min(c.values,function(v){
 			return v.population; }); }),
 		d3.max(dataSet, function(c) {return d3.max(c.values,function(v){
@@ -127,6 +120,7 @@ createVis = function() {
       
      popEst.append("path")
                 .attr("class", "line")
+                .datum(dataSet)
                 .attr("d", function(d) { return line(d.values); })
                 .style("stroke", function(d) { return color(d.name); });          
      
