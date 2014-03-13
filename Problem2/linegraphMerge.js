@@ -44,6 +44,36 @@ var color = d3.scale.category10();
 	});
 
 
+<<<<<<< HEAD
+   d3.csv("worldPop.csv", function(d) {
+      
+            return {
+                year:+d.year,
+                usCensus: +d.USCensus,
+                popRefBur: +d.PopulationBureau,
+                un: +d.UN,
+                hyde: +d.HYDE,
+                maddison: +d.Maddison};
+           },
+           
+	  function(error,rows){
+	      color.domain(d3.keys(rows[0]).filter(function(key) { return key !== "year"; }));
+	      rowsClean = rows || 0;
+	      dat.push(rowsClean);
+	      
+	    var cities = color.domain().map(function(name) {
+				 return {
+					 name: name,
+					 values: rowsClean.map(function(d) {
+						 return {year: d.year, population: +d[name]};
+							 })
+							 };
+							 });
+		cities.forEach( function(d,i) {
+			dataSet.push(d);
+		})					 		
+	    return createVis();
+=======
  d3.csv("worldPop.csv", function(data) {
 
     return {
@@ -54,6 +84,7 @@ var color = d3.scale.category10();
                 hyde: +data.HYDE,
                 maddison: +data.Maddison}; 
 },
+>>>>>>> 16eb17ee6182e8391efe80482b983a859ec73ced
 
        function(rows)  {         
 	   color.domain(d3.keys(rows[0]).filter(function(key) { return key !== "year"; }));
@@ -79,6 +110,36 @@ var color = d3.scale.category10();
 });
 
 
+<<<<<<< HEAD
+createVis = function(d){
+
+dataSet.forEach(function(d) {
+	console.log(d.values.length);
+})
+
+	dataSet.map(function(m){
+     	m.values = m.values.filter(function(a){return a.population >0})
+	 	});
+	 
+	var line = d3.svg.line()
+            .interpolate("basis")
+            .x(function(d) { return x(d.year); })
+            .y(function(d) { return y(d.population); });
+
+   
+	x.domain(d3.extent(dat, function(d){return d.year;}));
+
+	y.domain([
+		d3.min(dataSet, function(c) {return d3.min(c.values,function(v){
+			return v.population; }); }),
+		d3.max(dataSet, function(c) {return d3.max(c.values,function(v){
+			return v.population; }); })
+			]);
+	
+	svg.append("g")
+                .attr("class", "x-axis")
+                .attr("transform", "translate(0," + height + ")")
+=======
 
 createVis = function(){
 
@@ -110,6 +171,7 @@ createVis = function(){
 svg.append("g")
                 .attr("class", "x axis")
                 .attr("transform", "translate(0," + bbVis.h + ")")
+>>>>>>> 16eb17ee6182e8391efe80482b983a859ec73ced
                 .call(xAxis);
 
 svg.append("g")
