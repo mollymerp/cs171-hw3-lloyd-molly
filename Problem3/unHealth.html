@@ -4,7 +4,8 @@
     <title></title>
     <script src="../libs/d3.v3.min.js"></script>
     <style>
-        .axis path,
+   /*
+     .axis path,
         .axis line {
             fill: none;
             stroke: lightgrey; }
@@ -44,6 +45,29 @@
             fill:steelblue;
             fill-opacity:0.5;
         }
+*/
+
+
+body {
+  font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path {
+  display: none;
+}
+
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
 
     </style>
 
