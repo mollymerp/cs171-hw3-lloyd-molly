@@ -2,13 +2,13 @@
 <html>
 <head>
     <title></title>
-    <script src="../libs/d3.v3.min.js"></script>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
     <style>
-   /*
-     .axis path,
+        .axis path,
         .axis line {
             fill: none;
-            stroke: lightgrey; }
+            stroke: lightgrey
+	    shape-rendering: crispEdges; }
 
         .brush .extent {
             stroke: black;
@@ -45,30 +45,24 @@
             fill:steelblue;
             fill-opacity:0.5;
         }
-*/
 
+	body {
+	    font: 10px sans-serif;
+	}
 
-body {
-  font: 10px sans-serif;
-}
+	.x.axis path {
+	   display: none;
+	}
 
-.axis path,
-.axis line {
-  fill: none;
-  stroke: #000;
-  shape-rendering: crispEdges;
-}
+	.line {
+	   fill: none;
+	   stroke: steelblue;
+	   stroke-width: 1.5px;
+	}
 
-.x.axis path {
-  display: none;
-}
-
-.line {
-  fill: none;
-  stroke: steelblue;
-  stroke-width: 1.5px;
-}
-
+	.area {
+	  fill: steelblue;
+	}
     </style>
 
 </head>
@@ -76,7 +70,7 @@ body {
 <div id="visUN"></div>
 
 
-	<script src="unHealth.js"></script>
+<script src="unHealth.js"></script>
 
 
 </body>
