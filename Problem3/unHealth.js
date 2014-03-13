@@ -26,9 +26,9 @@ bbDetail = {
 };
 
 dataSet = [];
-rowsIN = [];
+var rowsIn = [];
 
-var dateFormat = d3.time.format("%x").parse;
+var dateFormat = d3.time.format("%m/%d/%Y").parse;
 
 var xScale = d3.time.scale().range([0, width]);
 var yOv = d3.scale.linear().range([bbOverview.h, 0]);
@@ -37,7 +37,7 @@ var yDetail = d3.scale.linear().range([bbDetail.h, 0]);
 var xAxis = d3.svg.axis().scale(xScale).orient("bottom");
 var yAxisOv = d3.svg.axis().scale(yOv).orient("left");
 
-var lineOv = d3.svg.line()
+var line = d3.svg.line()
     .x(function(d) { return xScale(d.date); })
     .y(function(d) { return yOv(d.tweets); });
 
@@ -50,60 +50,68 @@ svg = d3.select("#visUN").append("svg").attr({
         transform: "translate(" + margin.left + "," + margin.top + ")"
     });
 
-function sortAscending (a,b) {
-	return a-b;
-}
 
-d3.csv("unData.csv", function(error, data) {
+
+d3.csv("unHealth.csv", function(error, data) {
   data.forEach(function(d) {
     d.date = dateFormat(d.AnalysisDate);
     d.tweets = +d.WomensHealth;
-  },
+    rowsIn.push(d);
+     
+  }); 
   
-   function(rows){ rowsIn.push(rows);;
-  
- // console.log(data); /// wide array [1x53]
+ //console.log(data); /// wide array [1x53]
+   
+    dataSet.push(data);
+    return {
+	createOv();
+        createDetail();
+}});
  
-  dataSet = data;
-  return createOv ();
- })});
  
  
  //=================================   Begin Create OverView   =============================
  
  
  createOv = function(){
- 	
- 	dataSet.sort(sortAscending ());
+
  
- 	 //console.log(dataSet); /// long array [53 * 1] == data in reference file
- 	 
-	  xScale.domain(d3.extent(dataSet, function(d) {  return d.date; }));
-	  yOv.domain(d3.extent(dataSet, function(d) { return d.tweets;  }));
+ 
+     //console.log(d3.extent(rowsIn, function(d) {  return d.date; }));
+    // console.log(dataSet);/// long  array [1 * 53] == data in reference file
+    // console.log(rowsIn);/// wide  array [53 * 1] == data in reference file
+     
+	  xScale.domain(d3.extent(rowsIn, function(d) {  return d.date; }));
+	  yOv.domain(d3.extent(rowsIn, function(d) { return d.tweets;  }));
 	  
-	    svg.append("g")
+     svg.append("g")
       .attr("class", "x axis")
       .attr("transform", "translate(0," + bbOverview.h + ")")
       .call(xAxis);
 
-	  svg.append("g")
+     svg.append("g")
       .attr("class", "y axis")
       .call(yAxisOv)
-	  .append("text")
+      .append("text")
       .attr("transform", "rotate(-90)")
       .attr("y", 6)
       .attr("dy", ".71em")
       .style("text-anchor", "end")
-      .text("Women's Health Tweets");
+      .text("Tweets");
 
-	  svg.append("path")
-      	.datum(rows)
-	  	.attr("class", "line")
-	  	.attr("d", function(d) { 
-	  					console.log(d.tweets);
-						return lineOv(d.tweets); });
+svg.append("path")
+      	 .datum(rowsIn)
+	 .attr("class", "line")
+	 .attr("d", line);
 
-	  
+svg.selectAll("circle")
+         .data(rowsIn)
+	       .enter().append("svg:circle")
+	       .attr("cx", function(d){return xScale(d.date);})
+	       .attr("cy",function(d){return yOv(d.tweets);})
+         .attr("stroke","black")
+         .attr("fill","black")
+         .attr("r",1);
+
+	 
  };  /// ============================      closes CreateOv     =========================
- 
-   
