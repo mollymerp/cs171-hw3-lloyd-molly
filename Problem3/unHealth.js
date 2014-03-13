@@ -36,11 +36,16 @@ var yDetail = d3.scale.linear().range([bbDetail.h, 0]);
 
 var xAxis = d3.svg.axis().scale(xScale).orient("bottom");
 var yAxisOv = d3.svg.axis().scale(yOv).orient("left");
+var yAxisDetail = d3.svg.axis().scale(yDetail).orient("left");
+
+var area = d3.svg.area()
+    .x(function(d){return xScale(d.date);})
+    .y0(bbDetail.h)
+    .y1(function(d){return yDetail(d.tweets);});
 
 var line = d3.svg.line()
     .x(function(d) { return xScale(d.date); })
     .y(function(d) { return yOv(d.tweets); });
-
 
 
 svg = d3.select("#visUN").append("svg").attr({
@@ -50,7 +55,14 @@ svg = d3.select("#visUN").append("svg").attr({
         transform: "translate(" + margin.left + "," + margin.top + ")"
     });
 
-
+svgOv = svg.append("g")
+    .attr("class","Overview")
+    .attr("height", bbOverview.h);
+   
+svgDetail = svg.append("g")
+    .attr("class", "detail")
+    .attr("height", bbDetail.h)
+    .attr("transform","translate(0,100)") ;
 
 d3.csv("unHealth.csv", function(error, data) {
   data.forEach(function(d) {
@@ -58,15 +70,14 @@ d3.csv("unHealth.csv", function(error, data) {
     d.tweets = +d.WomensHealth;
     rowsIn.push(d);
      
-  }); 
+    }); 
   
  //console.log(data); /// wide array [1x53]
    
     dataSet.push(data);
-    return {
-	createOv();
-        createDetail();
-}});
+    return createOv(),
+       createDetail();
+    });
  
  
  
@@ -84,12 +95,12 @@ d3.csv("unHealth.csv", function(error, data) {
 	  xScale.domain(d3.extent(rowsIn, function(d) {  return d.date; }));
 	  yOv.domain(d3.extent(rowsIn, function(d) { return d.tweets;  }));
 	  
-     svg.append("g")
+     svgOv.append("g")
       .attr("class", "x axis")
       .attr("transform", "translate(0," + bbOverview.h + ")")
       .call(xAxis);
 
-     svg.append("g")
+     svgOv.append("g")
       .attr("class", "y axis")
       .call(yAxisOv)
       .append("text")
@@ -99,12 +110,12 @@ d3.csv("unHealth.csv", function(error, data) {
       .style("text-anchor", "end")
       .text("Tweets");
 
-svg.append("path")
+svgOv.append("path")
       	 .datum(rowsIn)
 	 .attr("class", "line")
 	 .attr("d", line);
 
-svg.selectAll("circle")
+svgOv.selectAll("circle")
          .data(rowsIn)
 	       .enter().append("svg:circle")
 	       .attr("cx", function(d){return xScale(d.date);})
@@ -115,3 +126,42 @@ svg.selectAll("circle")
 
 	 
  };  /// ============================      closes CreateOv     =========================
+ 
+//=================================  Begin CreateDetail =====================
+createDetail = function(){
+
+ 
+ 
+     //console.log(d3.extent(rowsIn, function(d) {  return d.date; }));
+    // console.log(dataSet);/// long  array [1 * 53] == data in reference file
+    // console.log(rowsIn);/// wide  array [53 * 1] == data in reference file
+     
+	  xScale.domain(d3.extent(rowsIn, function(d) {  return d.date; }));
+	  yDetail.domain(d3.extent(rowsIn, function(d) { return d.tweets;  }));
+	  
+svgDetail.append("path")
+      	 .datum(rowsIn)
+	 .attr("class", "area")
+	 .attr("d", area);
+
+
+     svgDetail.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + bbDetail.h + ")")
+      .call(xAxis);
+
+     svgDetail.append("g")
+      .attr("class", "y axis")
+      .call(yAxisDetail)
+      .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("Tweets");
+
+
+	 
+ }; // ====================  closes createDetail =====================
+
+
