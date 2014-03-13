@@ -57,6 +57,7 @@ var color = d3.scale.category10();
                 hyde: +d.HYDE,
                 maddison: +d.Maddison};
            },
+           
 	  function(error,rows){
 	      color.domain(d3.keys(rows[0]).filter(function(key) { return key !== "year"; }));
 	      rowsClean = rows || 0;
@@ -78,7 +79,12 @@ var color = d3.scale.category10();
 });
 
 
-createVis = function(){
+createVis = function(d){
+
+dataSet.forEach(function(d) {
+	console.log(d.values.length);
+})
+
 	dataSet.map(function(m){
      	m.values = m.values.filter(function(a){return a.population >0})
 	 	});
