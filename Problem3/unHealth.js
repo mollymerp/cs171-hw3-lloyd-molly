@@ -47,6 +47,10 @@ var line = d3.svg.line()
     .x(function(d) { return xScale(d.date); })
     .y(function(d) { return yOv(d.tweets); });
 
+var brush = d3.svg.brush()
+    .x(xScale)
+    .on("brush", brushed);
+
 
 svg = d3.select("#visUN").append("svg").attr({
     width: width + margin.left + margin.right,
@@ -54,6 +58,8 @@ svg = d3.select("#visUN").append("svg").attr({
     .append("g").attr({
         transform: "translate(" + margin.left + "," + margin.top + ")"
     });
+
+
 
 svgOv = svg.append("g")
     .attr("class","Overview")
@@ -63,6 +69,7 @@ svgDetail = svg.append("g")
     .attr("class", "detail")
     .attr("height", bbDetail.h)
     .attr("transform","translate(0,100)") ;
+
 
 d3.csv("unHealth.csv", function(error, data) {
   data.forEach(function(d) {
@@ -94,6 +101,8 @@ d3.csv("unHealth.csv", function(error, data) {
      
 	  xScale.domain(d3.extent(rowsIn, function(d) {  return d.date; }));
 	  yOv.domain(d3.extent(rowsIn, function(d) { return d.tweets;  }));
+
+
 	  
      svgOv.append("g")
       .attr("class", "x axis")
@@ -124,6 +133,11 @@ svgOv.selectAll("circle")
          .attr("fill","black")
          .attr("r",1);
 
+svgOv.append("g").attr("class", "x brush").call(brush)
+	 .selectAll("rect").attr({
+	  height: 60,
+	  transform: "translate(40,-10)"
+    });
 	 
  };  /// ============================      closes CreateOv     =========================
  
@@ -161,7 +175,13 @@ svgDetail.append("path")
       .text("Tweets");
 
 
+
 	 
  }; // ====================  closes createDetail =====================
 
 
+function brushed() {
+  xScale.domain(brush.empty() ? xScale.domain() : brush.extent());
+  focus.select(".line").attr("d", line);
+  focus.select(".x.axis").call(xAxis);
+}
