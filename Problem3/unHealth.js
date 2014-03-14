@@ -156,7 +156,14 @@ focus.selectAll("circle")
          .attr("stroke","black")
          .attr("fill","black")
          .attr("r",1)
-         .attr("clip-path","url(#clip)");
+         .attr("clip-path","url(#clip)")
+         .attr("id", function(d) {
+         	console.log(d3.max(rowsIn.map(function(d) { return d.tweets; })));
+	        if (d.tweets == d3.max(rowsIn.map(function(d) { return d.tweets; }))) {
+		        return "special";
+	        }
+         });
+
 
 
 	 
