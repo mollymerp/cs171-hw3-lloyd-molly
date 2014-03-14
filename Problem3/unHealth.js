@@ -53,11 +53,6 @@ var area = d3.svg.area()
     .y0(bbDetail.h)
     .y1(function(d){return yDetail(d.tweets);});
 
-var area2 = d3.svg.area()
-    .interpolate("monotone")
-    .x(function(d) { return xScale(d.date); })
-    .y0(bbDetail.h)
-    .y1(function(d) { return yOv(d.tweets); });
 
 var line = d3.svg.line()
     .x(function(d) { return xScale(d.date); })
@@ -77,7 +72,7 @@ svg = d3.select("#visUN").append("svg").attr({
 
 svg.append("defs").append("clipPath")
     .attr("id", "clip")
-  .append("rect")
+    .append("rect")
     .attr("width", width)
     .attr("height", height);
 
@@ -151,6 +146,17 @@ focus.append("g")
       .attr("dy", ".71em")
       .style("text-anchor", "end")
       .text("Tweets");
+      
+focus.selectAll("circle")
+         .data(rowsIn)
+	       .enter().append("svg:circle")
+	        .attr("class","dots")
+	       .attr("cx", function(d){return xScale(d.date);})
+	       .attr("cy",function(d){return yDetail(d.tweets);})
+         .attr("stroke","black")
+         .attr("fill","black")
+         .attr("r",1)
+         .attr("clip-path","url(#clip)");
 
 
 	 
@@ -193,9 +199,9 @@ context.append("path")
 
 context.selectAll("circle")
          .data(rowsIn)
-	       .enter().append("svg:circle")
-	       .attr("cx", function(d){return xScaleOv(d.date);})
-	       .attr("cy",function(d){return yOv(d.tweets);})
+	     .enter().append("svg:circle")
+	     .attr("cx", function(d){return xScaleOv(d.date);})
+	     .attr("cy",function(d){return yOv(d.tweets);})
          .attr("stroke","black")
          .attr("fill","black")
          .attr("r",1);
@@ -213,5 +219,8 @@ context.selectAll("circle")
 function brushed() {
   xScale.domain(brush.empty() ? xScaleOv.domain() : brush.extent());
   focus.select(".area").attr("d", area);
-  focus.select(".x.axis").call(xAxisOv);
+  focus.select(".x.axis").call(xAxis);
+  focus.selectAll(".dots").attr("cx", function(d){return xScale(d.date);})
+	       .attr("cy",function(d){return yDetail(d.tweets);});
+
 };
