@@ -135,8 +135,8 @@ focus.append("g")
       .text("Tweets");
       
 focus.selectAll("circle")
-         .data(rowsIn)
-	       .enter().append("svg:circle")
+      .data(rowsIn)
+	   .enter().append("svg:circle")
 	        .attr("class","dots")
 	       .attr("cx", function(d){return xScale(d.date);})
 	       .attr("cy",function(d){return yDetail(d.tweets);})

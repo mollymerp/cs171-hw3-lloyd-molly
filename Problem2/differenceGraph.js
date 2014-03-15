@@ -1,6 +1,6 @@
 var bbDetail, bbOverview, dataSet, svg, brush, createVis, dataSet, handle, height, margin, svg, width;
 
-var margin = {
+var marginOv = {
     top: 50,
     right: 50,
     bottom: 50,
@@ -14,8 +14,8 @@ var marginDetail= {
 	left: 50
 };
 
-var width = 960 - margin.left - margin.right;
-var height = 800 - margin.bottom - margin.top;
+var width = 960 - marginOv.left - marginOv.right;
+var height = 800 - marginOv.bottom - marginOv.top;
 var heightDetail = 800 - marginDetail.bottom - marginDetail.top;
 var color = d3.scale.category10();
 
@@ -35,12 +35,12 @@ bbDetail = {
 
 var xScaleDetail, xScaleOv,  yScaleDetail, yScaleOv, xAxisDetail, xAxisOv, yAxisDetail, yAxisOv;
 
-	xScale = d3.time.scale().range([0, width]);
-	xScaleOv = d3.time.scale().range([0, width]);
+	xScaleDetail = d3.scale.linear().range([0, width]).domain([0,2050]);
+	xScaleOv = d3.scale.linear().range([0, width]).domain([0,2050]);
 	yScaleOv = d3.scale.pow().exponent(.5).range([bbOverview.h, 0]);
 	yScaleDetail = d3.scale.pow().exponent(.5).range([bbDetail.h, 0]);
 
-	xAxis = d3.svg.axis().scale(xScale).orient("bottom");
+	xAxisDetail = d3.svg.axis().scale(xScaleDetail).orient("bottom");
 	xAxisOv = d3.svg.axis().scale(xScaleOv).orient("bottom");
 
 	yAxisOv = d3.svg.axis().scale(yScaleOv).orient("left");
@@ -49,12 +49,13 @@ var xScaleDetail, xScaleOv,  yScaleDetail, yScaleOv, xAxisDetail, xAxisOv, yAxis
 var lineDetail, lineOv;
 
 	lineDetail = d3.svg.line()
-    .x(function(d) { return xScaleOv(d.year); })
-    .y(function(d) { return yScaleOv(d.avg);});
+	.interpolate("linear")
+    .x(function(d) { return xScaleDetail(d.year);})
+    .y(function(d) { return yScaleDetail(d.avg);});
     
     lineOv = d3.svg.line()
-    .x(function(d) { return xScaleDetail(d.year); })
-    .y(function(d) { return yScaleDetail(d.avg);});
+    .x(function(d) { return xScaleOv(d.year); })
+    .y(function(d) { return yScaleOv(d.avg);});
     
     brush = d3.svg.brush()
     .x(xScaleOv)
@@ -66,10 +67,10 @@ var dataWide = [];
 
     
 svg = d3.select("#DifVisUN").append("svg").attr({
-    width: width + margin.left + margin.right,
-    height: height + margin.top + margin.bottom})
+    width: width + marginDetail.left + marginDetail.right,
+    height: height + marginOv.top + marginOv.bottom})
     .append("g").attr({
-        transform: "translate(" + margin.left + "," + margin.top + ")"
+        transform: "translate(" + marginOv.left + "," + marginOv.top + ")"
     });
 
 context = svg.append("g") // context == bbOverview == area2
@@ -99,17 +100,13 @@ d3.csv("consensus.csv", function(data) {
 
  function(rows) {
 	   color.domain(d3.keys(rows[0]).filter(function(key) { return key !== 				"year"; }));
-	  
-	 var rowsClean = rows; 
 	 
-	 console.log(rows);
-	
-	 dataWide.push(rowsClean);
+	 dataWide = rows;
 
      var values = color.domain().map(function(name) {
 	   return {
 	       name: name,
-	       values: rowsClean.map(function(d) {
+	       values: rows.map(function(d) {
 		  if (+d[name] == 0) {
 		       return {year:d.year,population:null, id: name};}
 		   else{ return {year: d.year, population: +d[name], id:name};}
@@ -120,21 +117,36 @@ d3.csv("consensus.csv", function(data) {
      values.forEach(function(d,i) { 
 	 dataSet.push(d);
      });
-
-     console.log(dataSet);
-     
+  
     return createVis();
 });
-/*
+
 
 // ----------------------------------------- End Data Call //
 
 createVis = function(){
 
 // ------------------------------------------  Begin Create Detail //
+	dataSet.map(function(m){
+		m.values = m.values.filter(function(a){return  a.population >0;});
+    }); 
+    
+    /*dataWide.map(function(d){
+    	d.values = d.filter(function(a){ return a.avg >0;});
+    	});*/
+    
+var  points = [];
 
-	xScaleDetail.domain(d3.extent(dataWide.map(function(d) { return d.year; })));	    	yScaleDetail.domain([0,d3.max(dataWide.map(function(d) { return d.avg;}))]);
-	
+  dataSet.forEach(function(data, i) {
+	data.values.forEach(function(d, j) {
+		points.push(d);});});
+    
+console.log(dataWide);
+
+xScaleDetail.domain([0,2050]);
+yScaleDetail.domain([0,d3.max(dataWide.map(function(d,i) {return d.maxVal;}))]);
+
+console.log(xScaleDetail(1996));	
 
    focus.append("g")
       .attr("class", "x axis")
@@ -151,19 +163,30 @@ createVis = function(){
       .style("text-anchor", "end")
       .text("Population");
 
-  var popEst = svg.svg.selectAll(".popEst")
-                .data(allValues)
+var popEstFocus = focus.selectAll(".popEst")
+                .data(dataSet)
                 .enter().append("g")
                 .attr("class", "popEst");
-  
-  	focus.append("path")
-      	 .datum(dataSet)
+  console.log(dataSet);
+/* popEstFocus.append("path")
       	 .attr("class", "line")
-      	 .attr("d", lineDetail);
-	
-	
+      	 .attr("d", function(d){return lineDetail(d.values);})
+      	 .style("stroke", function(d) {return color("avg"); });*/
+
+
+popEstFocus.selectAll("circle")
+       		.data(dataWide)
+       		.enter().append("svg:circle")
+	        .attr("class","dots")
+	       .attr("cx", function(d){ return xScaleDetail(d.year);})
+	       .attr("cy",function(d){return yScaleDetail(d.avg);})
+	       .attr("stroke",function(d) {return color("avg"); })
+	       .attr("fill",function(d) {return color("avg"); })
+	       .attr("r",2)
+	       .attr("clip-path","url(#clip)");
+	       
 	
 }; // closes createVis()
-*/
+
 
 function brushed (){};

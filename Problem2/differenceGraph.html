@@ -9,12 +9,6 @@
         font: 10px sans-serif;
     }
 
-    .axis path,
-    .axis line {
-        fill: none;
-        stroke: #000;
-        shape-rendering: crispEdges;
-    }
 
     .x.axis path {
         display: none;
@@ -33,13 +27,75 @@
             clip-path: url(#clip);
         }
     
-    
+         .axis path,
+        .axis line {
+            fill: none;
+            stroke: lightgrey
+	    shape-rendering: crispEdges; }
+
+        .brush .extent {
+            stroke: black;
+            fill-opacity: 0.125;
+            shape-rendering: crispEdges; }
+
+        .brush .handle {
+            stroke: black;
+            fill-opacity: 0.125; }
+
+        .timeArea {
+            fill: steelblue;
+				}
+
+        .path {
+            stroke: steelblue;
+            fill: none;
+
+        }
+
+        .overviewPath {
+            stroke-width:1;
+
+        }
+
+        .detailPath {
+            stroke-width:2;
+        }
+
+        .area {
+	        fill: steelblue;
+	        clip-path: url(#clip);
+	        }
+
+
+        .detailArea {
+            stroke: none;
+            fill:steelblue;
+            fill-opacity:0.5;
+        }
+
+	body {
+	    font: 10px sans-serif;
+	}
+
+	.x.axis path {
+	   display: none;
+	}
+
+	.line {
+	   fill: none;
+	   stroke: steelblue;
+	   stroke-width: 1.5px;
+	}
+
+	.area {
+	  fill: steelblue;
+	}
 
     </style>
 
 </head>
 <body>
-    <div id="vis"></div>
+    <div id="DifVisUN"></div>
 	<script src = "differenceGraph.js"></script>
 
 
