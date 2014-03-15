@@ -86,17 +86,6 @@ focus = svg.append("g")  // focus == bbDetail == area
     .attr("transform","translate(0,100)");
     
 
-/*
-var focus = svg.append("g") 
-    .attr("class", "focus")
-    .attr("transform", "translate(" + marginDetail.left + "," + marginDetail.top + ")");
-
-var context = svg.append("g") 
-    .attr("class", "context")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-*/
-
-
 // ==============================  Begin Data Call ==========================//
 
 d3.csv("unHealth.csv", function(error, data) {
@@ -119,13 +108,11 @@ d3.csv("unHealth.csv", function(error, data) {
 //=================================  Begin CreateDetail =====================
 createVis = function(){
 
- 
- 
      //console.log(d3.extent(rowsIn, function(d) {  return d.date; }));
-    // console.log(dataSet);/// long  array [1 * 53] == data in reference file
-    // console.log(rowsIn);/// wide  array [53 * 1] == data in reference file
+     console.log(dataSet);/// long  array [1 * 53] == data in reference file
+     console.log(rowsIn);/// wide  array [53 * 1] == data in reference file
      
-	  xScale.domain(d3.extent(rowsIn.map(function(d) { return d.date; })));	    	yDetail.domain([0,d3.max(rowsIn.map(function(d) { return d.tweets;  }))]);
+	xScale.domain(d3.extent(rowsIn.map(function(d) { return d.date; })));	    	yDetail.domain([0,d3.max(rowsIn.map(function(d) { return d.tweets;  }))]);
 	  
 focus.append("path")
       	 .datum(rowsIn)

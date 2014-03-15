@@ -21,17 +21,14 @@ var bbVis, brush, createVis, dataSet, handle, height, margin, svg, svg2, width;
 var xAxis, x, yAxis, y;
          x = d3.scale.linear().range([0, bbVis.w]);
           // define the right domain generically
-		  y = d3.scale.pow().exponent(.5).range([bbVis.h,0]);
-
-
+          y = d3.scale.pow().exponent(.5).range([bbVis.h,0]);
 
 xAxis =d3.svg.axis().scale(x).orient("bottom").tickFormat(d3.format("d"));
 yAxis = d3.svg.axis().scale(y).orient("left");
 
-//from mbostock: dat == data, dataSet = estimates
 
 
-var allYears =[];
+
 var dat = [];
 var dataSet = [];
 var allValues = [];
@@ -64,7 +61,7 @@ var color = d3.scale.category10();
 	   color.domain(d3.keys(rows[0]).filter(function(key) { return key !== "year"; }));
 
      var rowsClean = rows;
-     //console.log(rowsClean);
+     console.log(rowsClean);
            dat.push(rowsClean);
      
      rowsClean.forEach(function(d, i) {
@@ -80,9 +77,12 @@ var color = d3.scale.category10();
 		   else{
 		   return {year: d.year, population: +d[name]};}
 	       })}});
+	       
      values.forEach(function(d,i) { 
 	 allValues.push(d);
      });
+     
+
 
        var estimates = color.domain().map(function(name) {
 	   return {
@@ -90,7 +90,7 @@ var color = d3.scale.category10();
 	       values: rowsClean.map(function(d) {
 		   return {year: d.year, population: +d[name]};}
 				    )}});
-     //console.log(estimates);
+   
 
      estimates.forEach( function(d,i) {
 	 dataSet.push(d);
@@ -104,7 +104,7 @@ var color = d3.scale.category10();
 createVis = function(){
 
 
-    console.log(allValues);
+   
 
     dataSet.map(function(m){
 	m.values = m.values.filter(function(a){return  a.population >0;});
@@ -116,61 +116,48 @@ createVis = function(){
     var minYears = [];
     var maxYears = [];
     var interpVal = [];
-
+    var points = [];
+    
     dataSet.forEach(function(d,i){
 	    popExtent[i] = (d.values.map(function(a) {return a.population;}));
 	    yearExtent[i] = (d.values.map(function(a) {return a.year;}));
 	
     });
-    console.log(popExtent[0]);
-    
-	console.log(yearExtent[0]);
- 
+
     dataSet.forEach(function(d,i) {
-	//console.log(yearExtent);
+	interpScales[i] = d3.scale.pow().exponent(.5).range(popExtent[i]).domain(yearExtent[i]);
 	minYears[i] = d3.min(yearExtent[i]);
 	maxYears[i] = d3.max(yearExtent[i]);
     }); 
 
-    interpScales[0] = d3.scale.pow().exponent(.5).range(popExtent[0]).domain(yearExtent[0]);
-interpScales[1] = d3.scale.pow().exponent(.5).range(popExtent[1]).domain(yearExtent[1]);
-interpScales[2] = d3.scale.pow().exponent(.5).range(popExtent[2]).domain(yearExtent[2]);
-interpScales[3] = d3.scale.pow().exponent(.5).range(popExtent[3]).domain(yearExtent[3]);
-interpScales[4] = d3.scale.pow().exponent(.5).range(popExtent[4]).domain(yearExtent[4]);
-		
- 
     
    allValues.forEach(function(data, i) {
 	data.values.forEach(function(d, j) {
+		/*points.push(d);*/
 	    if ((d.population == null) &&  (d.year > minYears[i]) && (d.year < maxYears[i])){
-		return data.values[j].population = interpScales[i](d.year);
-		}
-	})
-    });
+			return data.values[j].population = interpScales[i](d.year),
+					data.values[j].type = "keep",
+					data.values[j].name = data.name;}
+		else { return data.values[j].name = data.name;}
+    })});
     
-    /*
-allYears.map(function(m){
-	    m.values = m.values.
-    });
-*/
+    allValues.map(function(m){
+	m.values = m.values.filter(function(a){return  a.population != null;});
+    }); 
 
+   allValues.forEach(function(data, i) {
+	data.values.forEach(function(d, j) {
+		points.push(d);})});
 
-
-
-    console.log(interpScales[0](2045));
-   
- 
     
-
     var line = d3.svg.line()
         .interpolate("linear")
         .x(function(d) { return x(d.year); })
         .y(function(d) { return  y(d.population); });
 
-    //console.log(dat.year);
+   
     x.domain([0,2050]);
 
-    //console.log(allValues);
 
     y.domain([
 	d3.min(allValues, function(c) {
@@ -179,15 +166,6 @@ allYears.map(function(m){
 	d3.max(allValues, function(c) {return d3.max(c.values,function(v){
 	    return v.population; }); })
     ]);
-    
-    interp_scale = d3.scale.linear().domain(
-    					[d3.min(dataSet, function(c) {
-							   return d3.min(c.values,function(v){
-								   return v.population; }); }),
-						d3.max(dataSet, function(c) {
-							return d3.max(c.values,function(v){
-								return v.population; }); })])
-				 .range([bbVis.h,0])
     
 svg.append("g")
                 .attr("class", "x axis")
@@ -214,11 +192,26 @@ var popEst = svg.selectAll(".popEst")
                 .enter().append("g")
                 .attr("class", "popEst");
       
-    popEst.append("path")
+  popEst.append("path")
                 .attr("class", "line")
                 .attr("d", function(d) {
-		    return line(d.values); })
+	                return line(d.values); })
                 .style("stroke", function(d) {return color(d.name); });
+
+
+ popEst.selectAll("circle")
+       .data(points)
+        .enter().append("svg:circle")
+	        .attr("class","dots")
+	       .attr("cx", function(d){ return x(d.year);})
+	       .attr("cy",function(d){return y(d.population);})
+	       .attr("stroke",function(d) {return color(d.name); })
+	       .attr("fill",function(d) {
+	         if (d.type == "keep") {
+		         return color(d.name);}
+		     else {return "white";} })
+         .attr("r",2)
+         .attr("clip-path","url(#clip)");
      
 
   /*   popEst.append("text")
