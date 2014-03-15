@@ -3,20 +3,20 @@ var bbDetail, bbOverview, dataSet, svg;
 var margin = {
     top: 50,
     right: 50,
-    bottom: 50,
+    bottom: 100,
     left: 50
 };
 
 var marginDetail= {
-	top:100,
+	top:150,
 	right:50,
 	bottom:20,
 	left: 50
 };
 
 var width = 960 - margin.left - margin.right;
-var height = 800 - margin.bottom - margin.top;
-var heightDetail = 800 - marginDetail.bottom - marginDetail.top;
+var height = 900 - margin.bottom - margin.top;
+var heightDetail = 900 - marginDetail.bottom - marginDetail.top;
 
 bbOverview = {
     x: 0,
@@ -27,7 +27,7 @@ bbOverview = {
 
 bbDetail = {
     x: 0,
-    y: 100,
+    y: 150,
     w: width,
     h: 300
 };
@@ -65,7 +65,7 @@ var brush = d3.svg.brush()
 
 svg = d3.select("#visUN").append("svg").attr({
     width: width + margin.left + margin.right,
-    height: height + margin.top + margin.bottom})
+    height: height + margin.top + margin.bottom+100})
     .append("g").attr({
         transform: "translate(" + margin.left + "," + margin.top + ")"
     });
@@ -83,7 +83,7 @@ context = svg.append("g") // context == bbOverview == area2
 focus = svg.append("g")  // focus == bbDetail == area
     .attr("class", "focus")
     .attr("height", bbDetail.h)
-    .attr("transform","translate(0,100)");
+    .attr("transform","translate(0,150)");
     
 
 // ==============================  Begin Data Call ==========================//
@@ -112,8 +112,22 @@ createVis = function(){
      console.log(dataSet);/// long  array [1 * 53] == data in reference file
      console.log(rowsIn);/// wide  array [53 * 1] == data in reference file
      
-	xScale.domain(d3.extent(rowsIn.map(function(d) { return d.date; })));	    	yDetail.domain([0,d3.max(rowsIn.map(function(d) { return d.tweets;  }))]);
-	  
+	xScale.domain(d3.extent(rowsIn.map(function(d) { return d.date; })));
+	yDetail.domain([0, 25000 + d3.max(rowsIn.map(function(d) { return d.tweets;  }))
+	]);
+	
+ svg.append("g")
+      .attr("class", "brush")
+      .call(brush)
+      .selectAll("rect")
+      .attr("y", -6)
+      .attr("height", bbOverview.h + 7);		
+	
+var div = d3.select("#visUN")
+			.append("div")
+			.attr("class","tooltip")
+			.style("opacity", 0);
+			
 focus.append("path")
       	 .datum(rowsIn)
       	 .attr("class", "area")
@@ -146,10 +160,33 @@ focus.selectAll("circle")
          .attr("clip-path","url(#clip)")
          .attr("id", function(d) {
          	console.log(d3.max(rowsIn.map(function(d) { return d.tweets; })));
-	        if (d.tweets == d3.max(rowsIn.map(function(d) { return d.tweets; }))) {
+	        if (d.tweets > 250000) {
 		        return "special";
 	        }
          });
+
+focus.selectAll("circle#special")
+	.attr("stroke", "red")
+	.attr("fill","red")
+	.attr("r", 3)
+	.on("mouseover", function(d) {
+	              	div.transition()
+	              	   .duration(200)
+	              	   .style("opacity", .9)
+	              	div.html("Insert Event Name Here")
+	              		.style("left",  (d3.event.pageX) + "px")
+	              		.style("top", (d3.event.pageY - 28) + "px");
+	              		})
+	.on("mouseout", function(d) { 
+	          		div.transition()
+	          			.duration(500)
+	          			.style("opacity", 0);
+	          			})
+	.on("click", function(d) {
+					console.log(xScaleOv(d.date));
+					svg.select(".brush").call(brush.extent([1/1/2012,1/3/2012]));
+	});
+
 
 
 
@@ -201,12 +238,7 @@ context.selectAll("circle")
          .attr("r",1);
 
 	 
- context.append("g")
-      .attr("class", "x brush")
-      .call(brush)
-      .selectAll("rect")
-      .attr("y", -6)
-      .attr("height", bbOverview.h + 7);	 
+ 
 
  };  /// ============================      closes CreateOv     =========================
 
