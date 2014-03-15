@@ -21,7 +21,9 @@ var bbVis, brush, createVis, dataSet, handle, height, margin, svg, svg2, width;
 var xAxis, x, yAxis, y;
          x = d3.scale.linear().range([0, bbVis.w]);
           // define the right domain generically
-y = d3.scale.pow().exponent(.5).range([bbVis.h,0]);
+		  y = d3.scale.pow().exponent(.5).range([bbVis.h,0]);
+
+
 
 xAxis =d3.svg.axis().scale(x).orient("bottom").tickFormat(d3.format("d"));
 yAxis = d3.svg.axis().scale(y).orient("left");
@@ -29,7 +31,7 @@ yAxis = d3.svg.axis().scale(y).orient("left");
 //from mbostock: dat == data, dataSet = cities
 
 
-
+var allYears =[];
 var dat = [];
 var dataSet = [];
 var color = d3.scale.category10();
@@ -71,7 +73,8 @@ var color = d3.scale.category10();
        });
 
 	cities.forEach( function(d,i) {
-	    dataSet.push(d);});
+	    dataSet.push(d);
+	    allYears.push(d);});
 
    // console.log(dataSet);
 
@@ -84,8 +87,14 @@ createVis = function(){
 
 
     dataSet.map(function(m){
-	m.values = m.values.filter(function(a){return a.population >0;});
+		m.values = m.values.filter(function(a){return a.population >0;});
     });
+    
+    /*
+allYears.map(function(m){
+	    m.values = m.values.
+    });
+*/
 
    // console.log(dataSet);
 
@@ -102,10 +111,19 @@ createVis = function(){
     y.domain([
 	d3.min(dataSet, function(c) {
 	    return d3.min(c.values,function(v){
-		return v.population; }); }),
+			return v.population; }); }),
 	d3.max(dataSet, function(c) {return d3.max(c.values,function(v){
 	    return v.population; }); })
     ]);
+    
+    interp_scale = d3.scale.linear().domain(
+    					[d3.min(dataSet, function(c) {
+							   return d3.min(c.values,function(v){
+								   return v.population; }); }),
+						d3.max(dataSet, function(c) {
+							return d3.max(c.values,function(v){
+								return v.population; }); })])
+				 .range([bbVis.h,0])
     
 svg.append("g")
                 .attr("class", "x axis")
@@ -135,6 +153,7 @@ var popEst = svg.selectAll(".popEst")
     popEst.append("path")
                 .attr("class", "line")
                 .attr("d", function(d) { 
+                		console.log(d.values);
 						return line(d.values); })
                 .style("stroke", function(d) {return color(d.name); });
      
